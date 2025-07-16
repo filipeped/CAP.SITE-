@@ -7,31 +7,43 @@ export default function Home() {
 
   const sendTestEvent = async () => {
     const now = new Date();
-    const timeFormatted = now.toLocaleString("pt-BR");
-    setTimestamp(timeFormatted);
+    setTimestamp(now.toLocaleString("pt-BR"));
     setStatus("⏳ Enviando evento de teste...");
 
     const event = {
-      event_name: "TestEvent",
+      event_name: "Lead",
       event_time: Math.floor(Date.now() / 1000),
       action_source: "website",
       event_source_url: "https://www.digitalpaisagismo.site",
       user_data: {
         external_id: "dec28dba1ef8f7a974d0daa5fb417e886d608ff870dea037176fafd3ef931045",
-        client_ip_address: "123.123.123.123",
-        client_user_agent: navigator.userAgent
+        client_ip_address: "177.155.123.123",
+        client_user_agent: navigator.userAgent,
+        fbp: "fb.1.1751360590432.213448171908285443",
+        fbc: "fb.1.1751360590432.IwAR3T_Exemplo"
       },
       custom_data: {
+        value: 900,
+        currency: "BRL",
+        content_name: "LeadFromForm",
+        content_type: "form",
+        content_category: "lead",
         diagnostic_mode: true,
         triggered_by: "manual_test"
       }
+    };
+
+    const payload = {
+      data: [event],
+      pixel_id: "756567727044969",
+      access_token: "EAAQfmxkTTZCcBPJ9ybiI3sduBGUZBBWqMZCXppJxK2evHgiJXiZB0HCK5qZAt9AAuutVGDM5xw0gGA10HUG6eZAjRGIfMj3QdCMZAwbdY5lGUQXlIuIRX6ZCPLV8CmysiNZCpsDf0HApMI6GeMNzLP5Bf7QLOig1CkUrOGpFPaTXV1q35f8QaMbm7IBVHFsI29AZDZD"
     };
 
     try {
       const res = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: [event] })
+        body: JSON.stringify(payload)
       });
 
       const json = await res.json();
