@@ -1,3 +1,4 @@
+```ts
 // ✅ DIGITAL PAISAGISMO CAPI V8.0 - IPv6 OTIMIZADO + DEDUPLICAÇÃO
 // Removido: normalização de acentos e eventos de vídeo
 // Adicionado: detecção inteligente IPv6 com fallback IPv4
@@ -21,12 +22,12 @@ function isDuplicateEvent(eventId: string): boolean {
   
   // Limpeza automática de eventos expirados
   let cleanedCount = 0;
-  for (const [id, timestamp] of eventCache.entries()) {
+  eventCache.forEach((timestamp, id) => {
     if (now - timestamp > CACHE_TTL) {
       eventCache.delete(id);
       cleanedCount++;
     }
-  }
+  });
   
   if (cleanedCount > 0) {
     console.log(`🧹 Cache limpo: ${cleanedCount} eventos expirados removidos`);
@@ -448,3 +449,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(500).json({ error: "Erro interno no servidor CAPI." });
   }
 }
+```
