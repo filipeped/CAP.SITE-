@@ -21,7 +21,8 @@ function isDuplicateEvent(eventId: string): boolean {
   
   // Limpeza automática de eventos expirados
   let cleanedCount = 0;
-  for (const [id, timestamp] of eventCache.entries()) {
+  const entries = Array.from(eventCache.entries());
+  for (const [id, timestamp] of entries) {
     if (now - timestamp > CACHE_TTL) {
       eventCache.delete(id);
       cleanedCount++;
