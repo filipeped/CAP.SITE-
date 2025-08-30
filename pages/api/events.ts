@@ -291,7 +291,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (anyReq.cookies && anyReq.cookies.session_id) {
             sessionId = anyReq.cookies.session_id;
           } else {
-            sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
+            sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 12)}`;
           }
         }
         externalId = sessionId ? hashSHA256(sessionId) : null;
