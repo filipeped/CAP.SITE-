@@ -1,5 +1,3 @@
-// /pages/api/events.ts
-
 // ✅ DIGITAL PAISAGISMO CAPI V8.1 - DEDUPLICAÇÃO CORRIGIDA
 // CORREÇÃO CRÍTICA: Event_id agora é consistente entre pixel e API
 // PROBLEMA IDENTIFICADO: Event_ids aleatórios impediam deduplicação correta
@@ -248,18 +246,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 🛡️ FILTRO DE DEDUPLICAÇÃO MELHORADO: Verificar duplicatas antes do processamento
     const originalCount = req.body.data.length;
-    const filteredData = (req.body.data as any[]).filter((event: any) => {
-      // Usar event_id do frontend ou gerar baseado em dados consistentes
-      let eventId = event.event_id;
-      if (!eventId) {
+    // Primeiro passo: gerar event_id para todos os eventos que não têm
+    const eventsWithIds = req.body.data.map((event: any) => {
+      if (!event.event_id) {
         const eventName = event.event_name || "Lead";
         const eventTime = event.event_time ? Math.floor(Number(event.event_time)) : Math.floor(Date.now() / 1000);
         const externalId = event.user_data?.external_id || "no_ext_id";
         const eventSourceUrl = event.event_source_url || origin || (req.headers.referer as string) || "https://www.digitalpaisagismo.com";
         const eventData = `${eventName}_${eventTime}_${externalId}_${eventSourceUrl}`;
-        eventId = `evt_${hashSHA256(eventData)?.substring(0, 16) || Date.now()}`;
+        event.event_id = `evt_${hashSHA256(eventData)?.substring(0, 16) || Date.now()}`;
       }
-      return !isDuplicateEvent(eventId);
+      return event;
+    });
+    
+    // Segundo passo: filtrar duplicatas usando os event_ids
+    const filteredData = eventsWithIds.filter((event: any) => {
+      return !isDuplicateEvent(event.event_id);
     });
 
     const duplicatesBlocked = originalCount - filteredData.length;
@@ -303,16 +305,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         event.event_source_url || origin || (req.headers.referer as string) || "https://www.digitalpaisagismo.com";
       const eventTime = event.event_time ? Math.floor(Number(event.event_time)) : Math.floor(Date.now() / 1000);
       
-      // ✅ CORREÇÃO CRÍTICA: Usar event_id do frontend ou gerar baseado em dados consistentes
-      let eventId = event.event_id;
-      if (!eventId) {
-        // Gerar event_id determinístico baseado em dados do evento para consistência
-        const eventData = `${eventName}_${eventTime}_${externalId || 'no_ext_id'}_${eventSourceUrl}`;
-        eventId = `evt_${hashSHA256(eventData)?.substring(0, 16) || Date.now()}`;
-        console.warn("⚠️ Event_id gerado no servidor (deve vir do frontend):", eventId);
-      } else {
-        console.log("✅ Event_id recebido do frontend:", eventId);
-      }
+      // ✅ Event_id já foi definido na etapa de deduplicação
+      const eventId = event.event_id;
+      console.log("✅ Event_id processado:", eventId);
       const actionSource = event.action_source || "website";
 
       const customData: Record<string, any> = { ...(event.custom_data || {}) };
