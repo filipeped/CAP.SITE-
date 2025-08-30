@@ -19,7 +19,7 @@ const MAX_CACHE_SIZE = 10000; // Limite de eventos no cache
 function isDuplicateEvent(eventId: string): boolean {
   const now = Date.now();
   
-  // Limpeza automática de eventos expirados
+  // ✅ CORREÇÃO CRÍTICA: Limpeza automática de eventos expirados com Array.from()
   let cleanedCount = 0;
   const entries = Array.from(eventCache.entries());
   for (const [id, timestamp] of entries) {
@@ -41,7 +41,7 @@ function isDuplicateEvent(eventId: string): boolean {
   
   // Controle de tamanho do cache
   if (eventCache.size >= MAX_CACHE_SIZE) {
-    const oldestKey = eventCache.keys().next().value;
+    const oldestKey = Array.from(eventCache.keys())[0];
     eventCache.delete(oldestKey);
     console.log('🗑️ Cache cheio: evento mais antigo removido');
   }
@@ -262,7 +262,7 @@ function rateLimit(ip: string): boolean {
   timestamps.push(now);
   rateLimitMap.set(ip, timestamps);
   if (rateLimitMap.size > 1000) {
-    const oldestKey = rateLimitMap.keys().next().value;
+    const oldestKey = Array.from(rateLimitMap.keys())[0];
     rateLimitMap.delete(oldestKey);
   }
   return true;
