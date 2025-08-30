@@ -1,3 +1,5 @@
+// /pages/api/events.ts
+
 // ✅ DIGITAL PAISAGISMO CAPI V8.1 - DEDUPLICAÇÃO CORRIGIDA
 // CORREÇÃO CRÍTICA: Event_id agora é consistente entre pixel e API
 // PROBLEMA IDENTIFICADO: Event_ids aleatórios impediam deduplicação correta
@@ -297,6 +299,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const eventName = event.event_name || "Lead";
+      const eventSourceUrl =
+        event.event_source_url || origin || (req.headers.referer as string) || "https://www.digitalpaisagismo.com";
+      const eventTime = event.event_time ? Math.floor(Number(event.event_time)) : Math.floor(Date.now() / 1000);
       
       // ✅ CORREÇÃO CRÍTICA: Usar event_id do frontend ou gerar baseado em dados consistentes
       let eventId = event.event_id;
@@ -308,9 +313,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else {
         console.log("✅ Event_id recebido do frontend:", eventId);
       }
-      const eventSourceUrl =
-        event.event_source_url || origin || (req.headers.referer as string) || "https://www.digitalpaisagismo.com";
-      const eventTime = event.event_time ? Math.floor(Number(event.event_time)) : Math.floor(Date.now() / 1000);
       const actionSource = event.action_source || "website";
 
       const customData: Record<string, any> = { ...(event.custom_data || {}) };
